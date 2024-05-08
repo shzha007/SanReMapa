@@ -42,6 +42,7 @@ app.post('/submit', async (req, res) => {
   }
 });
 
+// adding this for github demo purposes
 
 // Start the server
 app.listen(3000, () => console.log('Server running on http://localhost:3000'));
