@@ -1,0 +1,516 @@
+body {
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+}
+
+#map {
+    width: 100vw;
+    height: 100vh;
+}
+
+.header {
+    grid-area: header;
+    font-size: 40px;
+    height: 200px;
+    font-family: Arial, Helvetica, sans-serif;
+    background-color: rgba(255, 174, 0, 0.822);
+}
+
+.grid-container {
+    display: grid;
+    grid-template-areas:
+        'header header'
+        'left right';
+}
+
+.left {
+    grid-area: left;
+    width: 20vw;
+    height: 100vh;
+    border: 5px solid grey;
+}
+
+.toc {
+    margin-left: 10px;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+.right {
+    grid-area: right;
+    width: 80vw;
+    height: 100vh;
+    border: 5px solid gray;
+}
+
+.mousePosition {
+    position: fixed;
+    bottom: 5px;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 1px solid gray;
+    border-radius: 10px;
+    padding: 5px;
+    background-color: rgba(225, 225, 225, 0.6);
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 12px;
+}
+
+.ol-popup {
+    position: absolute;
+    background-color: white;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+    padding: 15px;
+    border-radius: 10px;
+    border: 1px solid #cccccc;
+    bottom: 12px;
+    left: -50px;
+    min-width: 280px;
+}
+
+.ol-popup:after,.ol-popup:before {
+    top: 100%;
+    border: solid transparent;
+    content: " ";
+    height: 0;
+    width: 0;
+    position: absolute;
+    pointer-events: none;
+}
+
+.ol-popup:after {
+    border-top-color: white;
+    border-width: 10px;
+    left: 48px;
+    margin-left: -10px;
+}
+
+.ol-popup:before {
+    border-top-color: white;
+    border-width: 11px;
+    left: 48px;
+    margin-left: -11px;
+}
+
+.ol-popup-closer {
+    text-decoration: none;
+    position: absolute;
+    top: 2px;
+    right: 8px;
+}
+
+.ol-popup-closer:after {
+    content: "X";
+}
+
+/*ATTRIBUTE QUERY */
+
+.myButtonDiv {
+    position: relative;
+    display: block;
+    margin: 1px auto auto 10px;
+}
+
+.attQueryDiv {
+    position: absolute;
+    display: none;
+    margin: 70px auto auto 45px;
+    /*padding: 10 px */
+    width: 250px;
+    /* height: 250px */
+    background-color: rgba(255, 255, 255, 0.9);
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 1em;
+    line-height: 1.45;
+    border-radius: 2px;
+    border: 1px solid #cccccc;
+    box-shadow: 0px 0px 15px rgba(252, 213, 213, 0.5);
+    z-index: 4
+    /* overflow: scroll */
+}
+
+#headerDiv {
+    background-color: midnightblue;
+    height: 35px;
+}
+
+#headerDiv label {
+    color: white;
+}
+
+.attQueryDiv select {
+    width: 225px;
+    height: 35px;
+    border: 1px solid lightgrey;
+    border-radius: 3px;
+    margin: 0px auto 0px 10px;
+}
+
+.attQueryDiv input {
+    width: 225px;
+    height: 35px;
+    border: 1px solid lightgrey;
+    border-radius: 3px;
+    margin: 0px auto 0px 10px;
+}
+
+.attQueryDiv label {
+    color: grey;
+    margin: 10px 10px 0px 10px;
+}
+
+.attQueryDiv label:nth-child(1) {
+    margin: 10px;
+    font-weight: bold;
+}
+
+.attQryRun {
+    color: white;
+    background-color: green;
+    border-radius: 3px;
+    border: 1px solid darkgreen;
+    height: 35px;
+    width: 50px;
+    margin: 10px;
+}
+
+.attListDiv {
+    position: absolute;
+    display: none;
+    margin: 350px auto auto 350px;
+    /*padding: 10px; */
+    width: auto;
+    max-width: 750px;
+    /* height: auto; */
+    /* max-height: 250px; */
+    height: 250px;
+    background-color: rgba(255, 255, 255, 0.9);
+    font-family:Arial, Helvetica, sans-serif;
+    font-size: 1em;
+    line-height: 1.45;
+    border-radius: 2px;
+    border: 1px solid #d1d1d1;
+    box-shadow: 2px 3px 2px rgba(0, 0, 0, 0.5);
+    /* z-index: 5; */
+    overflow: scroll;
+}
+
+#attQryTable {
+    padding: 0;
+    border-collapse: collapse;
+}
+
+#attQryTable, td, th {
+    padding: 0px 5px 0px 5px;
+    border: 1px solid black;
+}
+
+#attQryTable th {
+    color: white;
+    background-color: midnightblue;
+    position: sticky;
+    top: 0;
+    font-style: normal;
+    padding: 5px 10px 5px 10px;
+}
+
+#attQryTable tr:hover
+/* {font-weight: bolder; background-color: rgb(225, 225, 225);} */
+{background-color: lightgrey;}
+
+/*end query */
+
+.myButton {
+    height: 45px;
+    width: 45px;
+    border-radius: 2px;
+    border: none;
+    align-items: center;
+    background-color: yellow;
+}
+
+.myButton:hover{
+    background-color: rgb(228, 36, 10);
+}
+
+.myButton.clicked{
+    background-color: blue;
+}
+
+.myButton.clicked:hover{
+    background-color: green;
+}
+
+.homeButtonDiv{
+    position: relative;
+    display: block;
+    margin: 10px auto auto 10px;
+}
+
+.fsButtonDiv{
+    position: relative;
+    display: block;
+    margin: 1px auto auto 10px;
+}
+
+.featureInfoDiv {
+    position: relative;
+    display: block;
+    margin: 1px auto auto 10px;
+}
+
+.lengthButtonDiv {
+    position: relative;
+    display: block;
+    margin: 1px auto auto 10px;
+}
+
+.areaButtonDiv {
+    position: relative;
+    display: block;
+    margin: 1px auto auto 10px;
+}
+
+.geoTagButtonDiv {
+    position: relative;
+    display: block;
+    margin: 1px auto auto 10px;
+}
+
+/*start: Measure styling*/
+
+.ol-tooltip { 
+    position: relative;
+    background: rgba(0, 0, 0, 0.5);
+    border-radius: 4px;
+    color: white;
+    padding: 4px 8px;
+    opacity: 0.7; 
+    white-space: nowrap;
+    font-size: 12px;
+}
+
+.ol-tooltip-measure {
+    opacity: 1;
+    font-weight: bold;
+}
+
+.ol-tooltip-static {
+    background-color: #ffcc33;
+    color: black;
+    border: 1px solid white;
+}
+
+/* Corrected typo: .ol-tool-tip-static to .ol-tooltip-static */
+.ol-tooltip-measure:before, 
+.ol-tooltip-static:before {
+    border-top: 6px solid rgba(0, 0, 0, 0.5); /* Corrected typo: solif to solid */
+    border-right: 6px solid transparent;
+    border-left: 6px solid transparent;
+    content: "";
+    position: absolute;
+    bottom: -6px;
+    margin-left: -7px;
+    left: 50%;
+}
+
+.ol-tooltip-static:before {
+    border-top-color: #ffcc33;
+}
+
+.ziButtonDiv {
+    position: relative;
+    display: block;
+    margin: 1px auto auto 10px;
+}
+
+.zoButtonDiv {
+    position: relative;
+    display: block;
+    margin: 1px auto auto 10px;
+}
+
+
+/* Add this to your CSS file or within a <style> tag */
+.custom-cursor {
+    cursor: url('resources/images/geotag_cursor.png'), auto; /* Ensure this is a small, suitable icon */
+}
+
+
+.layer-control {
+    position: absolute;
+    top: 220px;
+    left: 1650px;
+    background: transparent ;
+    padding: 10px;
+    border-radius: 5px;
+    color: white;
+    width: 180px;
+    z-index: 1;
+}
+
+
+.layer-control-bm {
+    position: absolute;
+    top: 450px;
+    left: 1650px;
+    background: transparent;
+    padding: 10px;
+    border-radius: 5px;
+    color: white;
+    width: 180px;
+    z-index: 1;
+}
+
+.layer-control-bm h3 {
+    margin-top: 0;
+    font-size: 16px;
+    text-align: left;
+    font-family: 'Montserrat', sans-serif ;
+}
+
+.layer-control h3 {
+    margin-top: 0;
+    font-size: 16px;
+    text-align: center;
+    font-family: 'Montserrat', sans-serif ;
+}
+
+.layer-button {
+    background-color: rgb(252, 169, 15); /* Golden color */
+    border: none;
+    color: white;
+    padding: 10px 20px;
+    text-align: left;
+    text-decoration: none;
+    display: block;
+    font-size: 14px;
+    margin: 5px 0;
+    cursor: pointer;
+    border-radius: 10px;
+    box-shadow: 2px 2px 5px rgba(0,0,0,0.3);
+}
+
+.layer-button:hover {
+    background-color: #ffd700;
+}
+
+.layer-button.active {
+    background-color: #ffd700; /* Change this color to suit your active state styling */
+}
+
+.hidden {
+    display: none;
+}
+
+#categoryContainer {
+    position: relative;
+    top: 50px; /* Adjust based on layout */
+    right: 10px; /* Adjust based on layout */
+    padding: 10px;
+    background: #fff;
+    border-radius: 5px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+    width: 300px; /* Adjust width as necessary */
+    z-index: 1000;
+}
+
+#categoryContainer h2 {
+    text-align: center;
+    color: #333;
+    margin-bottom: 10px;
+    font-family: 'Montserrat', sans-serif ;
+}
+
+.category-item {
+    color: #fff;
+    padding: 10px;
+    margin: 5px 0;
+    border-radius: 5px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    font-family: 'Montserrat', sans-serif ;
+}
+
+.category-item img {
+    margin-right: 10px;
+    width: 20px; /* Adjust size as needed */
+    height: auto;
+}
+
+.category-item:hover {
+    opacity: 0.9;
+}
+
+
+#landmarkForm {
+    display: none;  
+    position: fixed; 
+    top: 50%;  
+    left: 50%; 
+    transform: translate(-50%, -50%); 
+    width: 90%;  
+    max-width: 400px;  
+    padding: 20px;
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    z-index: 1050;  
+    font-family: 'Montserrat', sans-serif ;
+}
+
+
+#landmarkForm h3, #landmarkForm p {
+    margin: 0;
+    color: #333;
+    font-family: 'Montserrat', sans-serif ;
+    text-align: center;
+}
+
+#landmarkForm label {
+    font-weight: bold;
+    color: #333;
+    font-family: 'Montserrat', sans-serif ;
+}
+
+#landmarkForm select, #landmarkForm textarea {
+    width: 90%;
+    padding: 10px;
+    margin-top: 5px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-family: 'Montserrat', sans-serif ;
+}
+
+#landmarkForm .photo-upload {
+    margin-top: 15px;
+    text-align: center;
+}
+
+#landmarkForm .custom-file-upload {
+    display: inline-block;
+    padding: 10px 20px;
+    cursor: pointer;
+    background-color: #f44336;
+    color: white;
+    border-radius: 5px;
+}
+
+#landmarkForm button[type="submit"] {
+    width: 100%;
+    padding: 10px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    margin-top: 10px;
+    cursor: pointer;
+    font-family: 'Montserrat', sans-serif ;
+}
+
+#landmarkForm button[type="submit"]:hover {
+    background-color: #45a049;
+}
+
+

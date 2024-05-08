@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SanReMapa-Participatory Mapping</title>
+    <link rel="stylesheet" href="resources/ol/ol.css">
+    <link rel="stylesheet" href="resources/layerswitcher/ol-layerswitcher.css">
+    <link rel="stylesheet" href="main.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+
+</head>
+
+<body>
+    
+    <div class="grid-container">
+        <div class="header">
+            <img src="resources/images/heading.png" alt="" style="width: inherit; height: inherit; vertical-align: middle;">
+        </div>
+
+        <div id="layerControl" class="layer-control">
+            <h3>CHOOSE YOUR MAP:</h3>
+            <button id="landslideButton" class="layer-button">Landslide Map</button>
+            <button id="stormSurgeButton" class="layer-button">Storm Surge Map</button>
+            <button id="floodButton" class="layer-button">Flood Map</button>
+            <button id="landUseButton" class="layer-button">Land Use Map</button>
+        </div>
+
+        <div id="baseMapControl" class="layer-control-bm">
+            <h3>BASE MAPS:</h3>
+            <button id="osmButton" class="layer-button">Open Street Map</button>
+            <button id="osmSatButton" class="layer-button">Open Street Map Satellite</button>
+        </div>
+        
+        
+            <div id="popup" class="ol-popup">
+                <a href="#" id="popup-closer" class="ol-popup-closer"></a>
+                <div id="popup-content"></div>
+            </div>
+            
+            <div class="attQueryDiv" id="attQueryDiv">
+                <div class="headerDiv" id="headerDiv">
+                    <label for="">Attribute Query</label>
+                </div><br>
+                <label for="">Select Layer</label>
+                <select name="selectLayer" id="selectLayer">
+                </select><br><br>
+            
+                <label for="">Select Attribute</label>
+                <select name="selectAttribute" id="selectAttribute">
+                </select><br><br>
+            
+                <label for="">Select Operator</label>
+                <select name="selectOperator" id="selectOperator">
+                </select><br><br>
+            
+                <label for="">Enter Value</label>
+                <input type="text" name="enterValue" id="enterValue"><br><br>
+            
+                <button type="button" id="attQryRun" class="attQryRun" onclick="attributeQuery()">Run</button>
+            </div>
+            <div class ="attListDiv" id="attListDiv">  </div>
+
+        <div id="categoryContainer" style="display:none;">
+            <h2>GEOTAG YOUR CONCERN:</h2>
+            <div class="category-item" data-category="Landmarks" style="background-color: #e74c3c;"><img src="resources/images/geotag.png" alt="Landmarks Icon"> Landmarks and Points of Interest</div>
+            <div class="category-item" data-category="Issues" style="background-color: #f39c12;"><img src="resources/images/geotag.png" alt="Issues Icon"> Issues and Challenges</div>
+            <div class="category-item" data-category="Improvements" style="background-color: #27ae60;"><img src="resources/images/geotag.png" alt="Improvements Icon"> Improvement Ideas</div>
+            <div class="category-item" data-category="Feedback" style="background-color: #3498db;"><img src="resources/images/geotag.png" alt="Feedback Icon"> Community Feedback</div>
+        </div>
+            
+                
+                <!-- Form for Landmarks and Points of Interest -->
+                <div id="landmarkForm" style="display:none; position: absolute;">
+                    <h3>Contribute to our community map!</h3>
+                    <p>Please describe the landmark or point of interest, noting its significance, condition, and accessibility. Adding a photo is highly encouraged to enhance your submission.</p>
+                    <label for="landmark-category">Select category:</label>
+                    <select id="landmark-category">
+                        <option>Historical Landmarks</option>
+                        <option>Cultural Sites</option>
+                        <option>Natural Landmarks</option>
+                        <option>Public Spaces</option>
+                        <option>Educational Institutions</option>
+                        <option>Government Buildings</option>
+                    </select>
+                    <label for="landmark-description">Description:</label>
+                    <textarea id="landmark-description" placeholder="Enter description here..."></textarea>
+                    <div class="photo-upload">
+                        <label for="photo-upload" class="custom-file-upload">
+                            <i class="fa fa-camera"></i> Upload a Photo
+                        </label>
+                        <input id="photo-upload" type="file" style="display: none;"/>
+                    </div>
+                    
+                    <button type="submit" id="submitForm">Submit</button>
+
+                </div>          
+
+            
+            <div id="infoBox" style="position: absolute; top: 50px; left: 10px; background: white; padding: 10px; display: none; z-index: 1000;"></div>
+
+
+    <div id="map"></div>
+    <script src="resources/ol/ol.js"></script>
+    <script src="resources/layerswitcher/ol-layerswitcher.js"></script>
+    <script src="resources/ol/interaction/Draw.js"></script>
+    <script src="resources/ol/layer/Vector.js"></script>
+    <script src="resources/ol/Overlay/Overlay.js"></script>
+    <script src="resources/ol/source/Vector.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="main.js"></script>
+</body>
+</html>
