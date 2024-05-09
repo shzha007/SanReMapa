@@ -93,8 +93,95 @@
                     </div>
                     
                     <button type="submit" id="submitForm">Submit</button>
+                    <button type="button" class="close-btn">Close</button>
 
-                </div>          
+                </div>    
+                
+                <!-- Form for Land Issues and Challenges -->
+                <div id="landissuesForm" style="display:none; position: absolute;">
+                    <h3>Contribute to our community map!</h3>
+                    <p> Help us identify and address pressing concerns in our community. Describe the issue, its location, and its impact on the community. </p>
+                    <label for="landissues-category">Select category:</label>
+                    <select id="landissues-category">
+                        <option>Infrastructure Problems</option>
+                        <option>Environmental Problems</option>
+                        <option>Public Safety Issues</option>
+                        <option>Traffic & Transportation</option>
+                        <option>Community Services</option>
+                    </select>
+                    <label for="urgency">Select Level of Urgency:</label>
+                    <select id="urgency"> 
+                        <option>Immediate</option>
+                        <option>High</option>
+                        <option>Moderate</option>
+                        <option>Low</option>
+                    </select>
+                    <label for="landissues-description">Description:</label>
+                    <textarea id="landissues-description" placeholder="Enter description here..."></textarea>
+                    <div class="photo-upload">
+                        <label for="photo-upload" class="custom-file-upload">
+                            <i class="fa fa-camera"></i> Upload a Photo
+                        </label>
+                        <input id="photo-upload" type="file" style="display: none;"/>
+                    </div>
+                    
+                    <button type="submit" id="submitForm">Submit</button>
+                    <button type="button" class="close-btn">Close</button>
+
+                </div>
+
+                <!-- Form for Improvement Ideas -->
+                <div id="improvementForm" style="display:none; position: absolute;">
+                    <h3>Contribute to our community map!</h3>
+                    <p>Contribute suggestions on how we can enhance our community’s environment, services, and infrastructure. Describe your idea, potential benefits, and any specific areas or aspects it addresses. Your creative solutions help us build a better future for everyone.</p>
+                    <label for="improvement-category">Select category:</label>
+                    <select id="improvement-category">
+                        <option>Urban Planning & Development</option>
+                        <option>Public Transport and Mobility</option>
+                        <option>Green Spaces and Environment</option>
+                        <option>Community Servi es & Facilities</option>
+                        <option>Safety & Security</option>
+                        <option>Technology & Innovation</option>
+                    </select>
+                    <label for="improvement-description">Description:</label>
+                    <textarea id="improvement-description" placeholder="Enter description here..."></textarea>
+                    <div class="photo-upload">
+                        <label for="photo-upload" class="custom-file-upload">
+                            <i class="fa fa-camera"></i> Upload a Photo
+                        </label>
+                        <input id="photo-upload" type="file" style="display: none;"/>
+                    </div>
+                    
+                    <button type="submit" id="submitForm">Submit</button>
+                    <button type="button" class="close-btn">Close</button>
+
+                </div>  
+
+                <!-- Form for Community Feedback -->
+                <div id="feedbackForm" style="display:none; position: absolute;">
+                    <h3>Contribute to our community map!</h3>
+                    <p>Share your thoughts and experiences regarding our community's projects, policies, and services. Your feedback is crucial for continuous improvement and making informed decisions that reflect our community's needs.</p>
+                    <label for="feedback-category">Select category:</label>
+                    <select id="feedback-category">
+                        <option>Municipal Services Feedback</option>
+                        <option>Project Feedback</option>
+                        <option>Policy and Governance</option>
+                        <option>Educational Services</option>
+                        <option>Community Events and Activities</option>
+                    </select>
+                    <label for="feedback-description">Description:</label>
+                    <textarea id="feedback-description" placeholder="Enter description here..."></textarea>
+                    <div class="photo-upload">
+                        <label for="photo-upload" class="custom-file-upload">
+                            <i class="fa fa-camera"></i> Upload a Photo
+                        </label>
+                        <input id="photo-upload" type="file" style="display: none;"/>
+                    </div>
+                    
+                    <button type="submit" id="submitForm">Submit</button>
+                    <button type="button" class="close-btn">Close</button>
+
+                </div>
 
             
             <div id="infoBox" style="position: absolute; top: 50px; left: 10px; background: white; padding: 10px; display: none; z-index: 1000;"></div>

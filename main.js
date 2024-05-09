@@ -1098,7 +1098,6 @@ document.addEventListener('DOMContentLoaded', function() {
     
 
     var categoryContainer = document.getElementById('categoryContainer');
-    var landmarkForm = document.getElementById('landmarkForm');
 
     // Toggle category container visibility
     geoTagButton.addEventListener("click", function () {
@@ -1109,36 +1108,71 @@ document.addEventListener('DOMContentLoaded', function() {
     const categoryButtons = document.querySelectorAll('.category-item');
     categoryButtons.forEach(button => {
         button.addEventListener('click', function() {
+            let currentCategory = this.getAttribute('data-category');
             categoryContainer.style.display = 'none';
             map.addInteraction(drawInteraction);  // Add geotag drawing interaction
     
-            var currentCategory = this.getAttribute('data-category');
-            if (currentCategory === "Landmarks") {
-                drawInteraction.on('drawend', function(event) {
-                    var coordinates = event.feature.getGeometry().getCoordinates();
-                    console.log("Geotag placed at:", event.feature.getGeometry().getCoordinates());
-                    map.removeInteraction(drawInteraction);
-                    showLandmarkForm(coordinates);
-                });
-            }
+            map.removeInteraction(drawInteraction);
+            map.addInteraction(drawInteraction);
+
+            drawInteraction.on('drawend', function(event) {
+                const coordinates = event.feature.getGeometry().getCoordinates();
+                console.log("Geotag placed at:", coordinates);
+                map.removeInteraction(drawInteraction);  // Remove interaction after placing
+
+                switch (currentCategory) {
+                    case "Landmarks":
+                        showLandmarkForm(coordinates);
+                        break;
+                    case "Issues":
+                        showLandIssueForm(coordinates);
+                        break;
+                    case "Improvements":
+                        showEnvironmentalForm(coordinates);
+                        break;
+                    case "Feedback":
+                        showCommunityFeedbackForm(coordinates);
+                        break;
+                }
+            });
         });
     });
-    
 
     function showLandmarkForm(coordinates) {
-        var form = document.getElementById('landmarkForm');
+        displayForm('landmarkForm', coordinates);
+    }
+
+    function showLandIssueForm(coordinates) {
+        displayForm('landissuesForm', coordinates);
+    }
+
+    function showEnvironmentalForm(coordinates) {
+        displayForm('improvementForm', coordinates);
+    }
+
+    function showCommunityFeedbackForm(coordinates) {
+        displayForm('feedbackForm', coordinates);
+    }
+
+    function displayForm(formId, coordinates) {
+        const form = document.getElementById(formId);
         if (form) {
             form.style.display = 'block';
             form.style.position = 'absolute';
-            var pixelCoordinates = map.getPixelFromCoordinate(coordinates); // Ensure this conversion if needed
+            const pixelCoordinates = map.getPixelFromCoordinate(coordinates);
             form.style.left = pixelCoordinates[0] + 'px';
             form.style.top = pixelCoordinates[1] + 'px';
+
+            // Close button functionality
+            form.querySelector('.close-btn').addEventListener('click', function() {
+                form.style.display = 'none';
+            });
+
             console.log("Form displayed at pixel coordinates:", pixelCoordinates);
         } else {
-            console.error("landmarkForm not found in the document.");
+            console.error(formId + " not found in the document.");
         }
-    } 
-    
+    }
 });
 
 // document.getElementById('submitForm').addEventListener('click', function() {
@@ -1174,3 +1208,62 @@ document.getElementById('submitForm').addEventListener('click', function() {
     
 });
 
+const express = require('express');
+const app = express();
+const port = 3000;
+
+
+// Client-side: JavaScript with OpenLayers
+document.addEventListener('DOMContentLoaded', function() {
+    fetch('/api/geotags')
+        .then(response => response.json())
+        .then(geotags => {
+            geotags.forEach(geotag => {
+                addGeotagToMap(geotag);
+            });
+        })
+        .catch(error => console.error('Error fetching geotags:', error));
+});
+
+function addGeotagToMap(geotag) {
+    const feature = new ol.Feature({
+        geometry: new ol.geom.Point(ol.proj.fromLonLat([geotag.longitude, geotag.latitude])),
+        name: geotag.description // Assuming 'description' is one of the fields
+    });
+
+    const vectorSource = new ol.source.Vector({
+        features: [feature]
+    });
+
+    const vectorLayer = new ol.layer.Vector({
+        source: vectorSource,
+        style: new ol.style.Style({
+            image: new ol.style.Icon({
+                src: 'resources/images/geotag.png',
+                scale: 0.05
+            })
+        })
+    });
+
+    map.addLayer(vectorLayer);
+}
+
+// Function to display the popup on hover
+map.on('pointermove', function(evt) {
+    if (evt.dragging) {
+        return; // Ignore drag events
+    }
+    const pixel = map.getEventPixel(evt.originalEvent);
+    const hit = map.hasFeatureAtPixel(pixel);
+    map.getTargetElement().style.cursor = hit ? 'pointer' : '';
+
+    if (hit) {
+        map.forEachFeatureAtPixel(pixel, function(feature, layer) {
+            const coord = feature.getGeometry().getCoordinates();
+            content.innerHTML = feature.get('name'); // Display feature's name
+            overlay.setPosition(coord);
+        });
+    } else {
+        overlay.setPosition(undefined);
+    }
+});

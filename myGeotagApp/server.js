@@ -18,23 +18,11 @@ const pool = new Pool({
   port: 5432  // default port for PostgreSQL
 });
 
-// Handle POST requests to '/submit'
-// app.post('/submit', async (req, res) => {
-//   const { category, description } = req.body;
-//   try {
-//     const query = 'INSERT INTO test_database(category, description) VALUES($1, $2)';
-//     await pool.query(query, [category, description]);
-//     res.status(201).send("Data saved successfully.");
-//   } catch (err) {
-//     console.error(err);
-//     res.status(500).send("Failed to save data.");
-//   }
-// });
 app.post('/submit', async (req, res) => {
-  const { category, description } = req.body;
+  const { category, description, latitude, longitude } = req.body;
   try {
-      const query = 'INSERT INTO test_database(category, description) VALUES($1, $2)';
-      await pool.query(query, [category, description]);
+      const query = 'INSERT INTO test_database(category, description, location) VALUES($1, $2, ST_SetSRID(ST_Point($3, $4), 4326))';
+      await pool.query(query, [category, description, longitude, latitude]); // Note longitude comes first in ST_Point
       res.status(201).json({ message: "Data saved successfully." });
   } catch (err) {
       console.error(err);
@@ -42,7 +30,22 @@ app.post('/submit', async (req, res) => {
   }
 });
 
+
 // adding this for github demo purposes
 
 // Start the server
 app.listen(3000, () => console.log('Server running on http://localhost:3000'));
+
+
+// Server-side: Node.js with Express
+app.get('/api/geotags', async (req, res) => {
+  try {
+      const query = 'SELECT category, description, latitude, longitude FROM test_database'; // Adjust based on your columns
+      const { rows } = await pool.query(query);
+      res.json(rows);
+  } catch (err) {
+      console.error(err);
+      res.status(500).json({ message: "Failed to fetch data." });
+  }
+});
+
