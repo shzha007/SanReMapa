@@ -19,16 +19,28 @@ const pool = new Pool({
 });
 
 app.post('/submit', async (req, res) => {
-  const { category, description, latitude, longitude } = req.body;
+  const { category, description, longitude, latitude } = req.body;
   try {
-      const query = 'INSERT INTO test_database(category, description, location) VALUES($1, $2, ST_SetSRID(ST_Point($3, $4), 4326))';
-      await pool.query(query, [category, description, longitude, latitude]); // Note longitude comes first in ST_Point
+      const query = 'INSERT INTO test_database(category, description, longitude, latitude) VALUES($1, $2, $3, $4)';
+      await pool.query(query, [category, description, longitude, latitude]);
       res.status(201).json({ message: "Data saved successfully." });
   } catch (err) {
       console.error(err);
       res.status(500).json({ message: "Failed to save data." });
   }
 });
+
+// app.post('/submit', async (req, res) => {
+//   const { category, description, latitude, longitude } = req.body;
+//   try {
+//       const query = 'INSERT INTO test_database(category, description, location) VALUES($1, $2, ST_SetSRID(ST_Point($3, $4), 4326))';
+//       await pool.query(query, [category, description, longitude, latitude]); // Note longitude comes first in ST_Point
+//       res.status(201).json({ message: "Data saved successfully." });
+//   } catch (err) {
+//       console.error(err);
+//       res.status(500).json({ message: "Failed to save data." });
+//   }
+// });
 
 
 // adding this for github demo purposes
@@ -37,15 +49,15 @@ app.post('/submit', async (req, res) => {
 app.listen(3000, () => console.log('Server running on http://localhost:3000'));
 
 
-// Server-side: Node.js with Express
-app.get('/api/geotags', async (req, res) => {
-  try {
-      const query = 'SELECT category, description, latitude, longitude FROM test_database'; // Adjust based on your columns
-      const { rows } = await pool.query(query);
-      res.json(rows);
-  } catch (err) {
-      console.error(err);
-      res.status(500).json({ message: "Failed to fetch data." });
-  }
-});
+// // Server-side: Node.js with Express
+// app.get('/api/geotags', async (req, res) => {
+//   try {
+//       const query = 'SELECT category, description, latitude, longitude FROM test_database'; // Adjust based on your columns
+//       const { rows } = await pool.query(query);
+//       res.json(rows);
+//   } catch (err) {
+//       console.error(err);
+//       res.status(500).json({ message: "Failed to fetch data." });
+//   }
+// });
 

@@ -89,6 +89,10 @@ map.addLayer(SanRemStorm);
 map.addLayer(SanRemLandUse);
 map.addLayer(noneTile);
 
+
+// var currentCoordinates = null;
+
+
 // Function to toggle the visibility of a specific layer by title
 // Function to toggle the visibility of a specific layer by title
 function toggleLayerVisibility(layerTitle) {
@@ -1117,8 +1121,18 @@ document.addEventListener('DOMContentLoaded', function() {
 
             drawInteraction.on('drawend', function(event) {
                 const coordinates = event.feature.getGeometry().getCoordinates();
-                console.log("Geotag placed at:", coordinates);
-                map.removeInteraction(drawInteraction);  // Remove interaction after placing
+                // console.log("Geotag placed at:", coordinates);
+                // map.removeInteraction(drawInteraction);  // Remove interaction after placing
+
+                // Convert coordinates to longitude and latitude
+                currentCoordinates = {
+                    longitude: coordinates[0],
+                    latitude: coordinates[1]
+                };
+                console.log("Geotag placed at:", currentCoordinates);
+                map.removeInteraction(drawInteraction); // Remove interaction after placing
+
+                // Now you can use `currentCoordinates` in your form display or other functionalities
 
                 switch (currentCategory) {
                     case "Landmarks":
@@ -1187,6 +1201,7 @@ document.addEventListener('DOMContentLoaded', function() {
 // });
 
 document.getElementById('submitForm').addEventListener('click', function() {
+    console.log("im here");
     var category = document.getElementById('landmark-category').value;
     var description = document.getElementById('landmark-description').value;
     console.log("Submitting Form:", { category, description });
@@ -1202,68 +1217,97 @@ document.getElementById('submitForm').addEventListener('click', function() {
     .then(response => response.json())
     .then(data => alert('Form submitted successfully!'))
     .catch(error => console.error('Error:', error));
+    // if (!currentCoordinates) {
+    //     alert("Please select a location on the map before submitting.");
+    //     return; // Exit if no coordinates have been selected
+    // }
 
-    // Hide the form after submission
-    document.getElementById('landmarkForm').style.display = 'none';
+    // console.log("Submitting Form:", { category, description, ...currentCoordinates });
+
+    // // Send data to the server including coordinates
+    // fetch('http://localhost:3000/submit', {
+    //     method: 'POST',
+    //     headers: {
+    //         'Content-Type': 'application/json'
+    //     },
+    //     body: JSON.stringify({
+    //         category: category,
+    //         description: description,
+    //         longitude: currentCoordinates.longitude,
+    //         latitude: currentCoordinates.latitude
+    //     })
+    // })
+    // .then(response => response.json())
+    // .then(data => {
+    //     alert('Form submitted successfully!');
+    //     document.getElementById('landmarkForm').style.display = 'none'; // Hide the form after submission
+
+    //     // Optionally, clear the currentCoordinates after successful submission
+    //     currentCoordinates = null;
+    // })
+    // .catch(error => console.error('Error:', error));
+
+    // // Hide the form after submission
+    // document.getElementById('landmarkForm').style.display = 'none';
     
 });
 
-const express = require('express');
-const app = express();
-const port = 3000;
+// const express = require('express');
+// const app = express();
+// const port = 3000;
 
 
-// Client-side: JavaScript with OpenLayers
-document.addEventListener('DOMContentLoaded', function() {
-    fetch('/api/geotags')
-        .then(response => response.json())
-        .then(geotags => {
-            geotags.forEach(geotag => {
-                addGeotagToMap(geotag);
-            });
-        })
-        .catch(error => console.error('Error fetching geotags:', error));
-});
+// // Client-side: JavaScript with OpenLayers
+// document.addEventListener('DOMContentLoaded', function() {
+//     fetch('/api/geotags')
+//         .then(response => response.json())
+//         .then(geotags => {
+//             geotags.forEach(geotag => {
+//                 addGeotagToMap(geotag);
+//             });
+//         })
+//         .catch(error => console.error('Error fetching geotags:', error));
+// });
 
-function addGeotagToMap(geotag) {
-    const feature = new ol.Feature({
-        geometry: new ol.geom.Point(ol.proj.fromLonLat([geotag.longitude, geotag.latitude])),
-        name: geotag.description // Assuming 'description' is one of the fields
-    });
+// function addGeotagToMap(geotag) {
+//     const feature = new ol.Feature({
+//         geometry: new ol.geom.Point(ol.proj.fromLonLat([geotag.longitude, geotag.latitude])),
+//         name: geotag.description // Assuming 'description' is one of the fields
+//     });
 
-    const vectorSource = new ol.source.Vector({
-        features: [feature]
-    });
+//     const vectorSource = new ol.source.Vector({
+//         features: [feature]
+//     });
 
-    const vectorLayer = new ol.layer.Vector({
-        source: vectorSource,
-        style: new ol.style.Style({
-            image: new ol.style.Icon({
-                src: 'resources/images/geotag.png',
-                scale: 0.05
-            })
-        })
-    });
+//     const vectorLayer = new ol.layer.Vector({
+//         source: vectorSource,
+//         style: new ol.style.Style({
+//             image: new ol.style.Icon({
+//                 src: 'resources/images/geotag.png',
+//                 scale: 0.05
+//             })
+//         })
+//     });
 
-    map.addLayer(vectorLayer);
-}
+//     map.addLayer(vectorLayer);
+// }
 
-// Function to display the popup on hover
-map.on('pointermove', function(evt) {
-    if (evt.dragging) {
-        return; // Ignore drag events
-    }
-    const pixel = map.getEventPixel(evt.originalEvent);
-    const hit = map.hasFeatureAtPixel(pixel);
-    map.getTargetElement().style.cursor = hit ? 'pointer' : '';
+// // Function to display the popup on hover
+// map.on('pointermove', function(evt) {
+//     if (evt.dragging) {
+//         return; // Ignore drag events
+//     }
+//     const pixel = map.getEventPixel(evt.originalEvent);
+//     const hit = map.hasFeatureAtPixel(pixel);
+//     map.getTargetElement().style.cursor = hit ? 'pointer' : '';
 
-    if (hit) {
-        map.forEachFeatureAtPixel(pixel, function(feature, layer) {
-            const coord = feature.getGeometry().getCoordinates();
-            content.innerHTML = feature.get('name'); // Display feature's name
-            overlay.setPosition(coord);
-        });
-    } else {
-        overlay.setPosition(undefined);
-    }
-});
+//     if (hit) {
+//         map.forEachFeatureAtPixel(pixel, function(feature, layer) {
+//             const coord = feature.getGeometry().getCoordinates();
+//             content.innerHTML = feature.get('name'); // Display feature's name
+//             overlay.setPosition(coord);
+//         });
+//     } else {
+//         overlay.setPosition(undefined);
+//     }
+// });
