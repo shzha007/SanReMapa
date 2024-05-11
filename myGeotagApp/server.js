@@ -19,9 +19,23 @@ const pool = new Pool({
 });
 
 app.post('/submit', async (req, res) => {
-  const { category, description, longitude, latitude } = req.body;
+  const { category, description, location } = req.body;
+
+  // Extract latitude and longitude from location object
+  const latitude = parseFloat(location.latitude);
+  const longitude = parseFloat(location.longitude);
+
+  if (!latitude || !longitude) {
+      res.status(400).json({ message: "Invalid or missing latitude or longitude." });
+      return;
+  }
+
   try {
-      const query = 'INSERT INTO test_database(category, description, longitude, latitude) VALUES($1, $2, $3, $4)';
+      const query = `
+          INSERT INTO test_database (category, description, location)
+          VALUES ($1, $2, ST_SetSRID(ST_MakePoint($3, $4), 4326))
+      `;
+      // 4326 is the SRID for WGS84, a common coordinate system used in GPS and Google Earth
       await pool.query(query, [category, description, longitude, latitude]);
       res.status(201).json({ message: "Data saved successfully." });
   } catch (err) {
@@ -30,10 +44,12 @@ app.post('/submit', async (req, res) => {
   }
 });
 
+
+
 // app.post('/submit', async (req, res) => {
 //   const { category, description, latitude, longitude } = req.body;
 //   try {
-//       const query = 'INSERT INTO test_database(category, description, location) VALUES($1, $2, ST_SetSRID(ST_Point($3, $4), 4326))';
+//       const query = 'INSERT INTO test_database(category, description, longitude, latitude) VALUES($1, $2, ST_SetSRID(ST_Point($3, $4), 4326))';
 //       await pool.query(query, [category, description, longitude, latitude]); // Note longitude comes first in ST_Point
 //       res.status(201).json({ message: "Data saved successfully." });
 //   } catch (err) {
@@ -52,7 +68,7 @@ app.listen(3000, () => console.log('Server running on http://localhost:3000'));
 // // Server-side: Node.js with Express
 // app.get('/api/geotags', async (req, res) => {
 //   try {
-//       const query = 'SELECT category, description, latitude, longitude FROM test_database'; // Adjust based on your columns
+//       const query = 'SELECT category, description, location FROM test_database'; // Adjust based on your columns
 //       const { rows } = await pool.query(query);
 //       res.json(rows);
 //   } catch (err) {

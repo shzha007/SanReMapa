@@ -1,3 +1,4 @@
+
 var mapView = new ol.View({
     center: ol.proj.fromLonLat([123.94545, 11.00665]),
     zoom: 12 // Adjusted zoom level
@@ -8,6 +9,8 @@ var map = new ol.Map({
     view: mapView,
     controls: []
 });
+
+var currentCoordinates = null;
 
 var noneTile = new ol.layer.Tile({
     title: 'None',
@@ -1100,6 +1103,7 @@ document.addEventListener('DOMContentLoaded', function() {
         })
     });
     
+    
 
     var categoryContainer = document.getElementById('categoryContainer');
 
@@ -1120,17 +1124,14 @@ document.addEventListener('DOMContentLoaded', function() {
             map.addInteraction(drawInteraction);
 
             drawInteraction.on('drawend', function(event) {
-                const coordinates = event.feature.getGeometry().getCoordinates();
-                // console.log("Geotag placed at:", coordinates);
-                // map.removeInteraction(drawInteraction);  // Remove interaction after placing
-
-                // Convert coordinates to longitude and latitude
+                var coordinates = event.feature.getGeometry().getCoordinates();
+                var lonLat = ol.proj.transform(coordinates, 'EPSG:3857', 'EPSG:4326');
                 currentCoordinates = {
-                    longitude: coordinates[0],
-                    latitude: coordinates[1]
+                    longitude: lonLat[0],
+                    latitude: lonLat[1]
                 };
                 console.log("Geotag placed at:", currentCoordinates);
-                map.removeInteraction(drawInteraction); // Remove interaction after placing
+                map.removeInteraction(drawInteraction);
 
                 // Now you can use `currentCoordinates` in your form display or other functionalities
 
@@ -1200,55 +1201,63 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // });
 
+
+// Assuming 'map' is your OpenLayers map instance
+map.on('singleclick', function(evt) {
+    // Convert the clicked coordinate into longitude and latitude
+    var coords = ol.proj.toLonLat(evt.coordinate);
+    var latitude = coords[1];
+    var longitude = coords[0];
+
+    // Update hidden form fields
+    document.getElementById('latitude').value = latitude.toFixed(6); // Limiting the decimal places to 6
+    document.getElementById('longitude').value = longitude.toFixed(6);
+
+    console.log('Map clicked at latitude: ' + latitude + ', longitude: ' + longitude);
+});
+
+
 document.getElementById('submitForm').addEventListener('click', function() {
-    console.log("im here");
+    console.log("I'm here");
+
+    // Ensure latitude and longitude values are obtained and parsed correctly
+    var latitude = parseFloat(document.getElementById('latitude').value);
+    var longitude = parseFloat(document.getElementById('longitude').value);
+    if (!latitude || !longitude) {
+        alert("Invalid or missing latitude or longitude.");
+        return;
+    }
+
+    var location = { latitude, longitude };
+
     var category = document.getElementById('landmark-category').value;
     var description = document.getElementById('landmark-description').value;
-    console.log("Submitting Form:", { category, description });
 
-    // Send data to the server
+    console.log("Submitting Form:", { category, description, ...location });
+
     fetch('http://localhost:3000/submit', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ category, description })
+        body: JSON.stringify({
+            category,
+            description,
+            location  // Using the new location object here
+        })
     })
     .then(response => response.json())
-    .then(data => alert('Form submitted successfully!'))
-    .catch(error => console.error('Error:', error));
-    // if (!currentCoordinates) {
-    //     alert("Please select a location on the map before submitting.");
-    //     return; // Exit if no coordinates have been selected
-    // }
+    .then(data => {
+        alert('Form submitted successfully!');
+        document.getElementById('landmarkForm').style.display = 'none'; // Hide the form after successful submission
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Failed to submit form.'); // Provide user feedback on failure
+    })
 
-    // console.log("Submitting Form:", { category, description, ...currentCoordinates });
-
-    // // Send data to the server including coordinates
-    // fetch('http://localhost:3000/submit', {
-    //     method: 'POST',
-    //     headers: {
-    //         'Content-Type': 'application/json'
-    //     },
-    //     body: JSON.stringify({
-    //         category: category,
-    //         description: description,
-    //         longitude: currentCoordinates.longitude,
-    //         latitude: currentCoordinates.latitude
-    //     })
-    // })
-    // .then(response => response.json())
-    // .then(data => {
-    //     alert('Form submitted successfully!');
-    //     document.getElementById('landmarkForm').style.display = 'none'; // Hide the form after submission
-
-    //     // Optionally, clear the currentCoordinates after successful submission
-    //     currentCoordinates = null;
-    // })
-    // .catch(error => console.error('Error:', error));
-
-    // // Hide the form after submission
-    // document.getElementById('landmarkForm').style.display = 'none';
+    // Hide the form after submission
+    document.getElementById('landmarkForm').style.display = 'none';
     
 });
 
@@ -1292,22 +1301,22 @@ document.getElementById('submitForm').addEventListener('click', function() {
 //     map.addLayer(vectorLayer);
 // }
 
-// // Function to display the popup on hover
-// map.on('pointermove', function(evt) {
-//     if (evt.dragging) {
-//         return; // Ignore drag events
-//     }
-//     const pixel = map.getEventPixel(evt.originalEvent);
-//     const hit = map.hasFeatureAtPixel(pixel);
-//     map.getTargetElement().style.cursor = hit ? 'pointer' : '';
+// Function to display the popup on hover
+map.on('pointermove', function(evt) {
+    if (evt.dragging) {
+        return; // Ignore drag events
+    }
+    const pixel = map.getEventPixel(evt.originalEvent);
+    const hit = map.hasFeatureAtPixel(pixel);
+    map.getTargetElement().style.cursor = hit ? 'pointer' : '';
 
-//     if (hit) {
-//         map.forEachFeatureAtPixel(pixel, function(feature, layer) {
-//             const coord = feature.getGeometry().getCoordinates();
-//             content.innerHTML = feature.get('name'); // Display feature's name
-//             overlay.setPosition(coord);
-//         });
-//     } else {
-//         overlay.setPosition(undefined);
-//     }
-// });
+    if (hit) {
+        map.forEachFeatureAtPixel(pixel, function(feature, layer) {
+            const coord = feature.getGeometry().getCoordinates();
+            content.innerHTML = feature.get('name'); // Display feature's name
+            overlay.setPosition(coord);
+        });
+    } else {
+        overlay.setPosition(undefined);
+    }
+});
