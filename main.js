@@ -1190,16 +1190,6 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
-// document.getElementById('submitForm').addEventListener('click', function() {
-//     var category = document.getElementById('landmark-category').value;
-//     var description = document.getElementById('landmark-description').value;
-//     console.log("Submitting Form:", { category, description });
-//     alert('Form submitted! Check console for data.');
-
-//     // Hide the form after submission
-//     document.getElementById('landmarkForm').style.display = 'none';
-
-// });
 
 
 // Assuming 'map' is your OpenLayers map instance
@@ -1217,106 +1207,93 @@ map.on('singleclick', function(evt) {
 });
 
 
-document.getElementById('submitForm').addEventListener('click', function() {
-    console.log("I'm here");
+document.getElementById('submitForm').addEventListener('click', function(event) {
+    event.preventDefault();
 
-    // Ensure latitude and longitude values are obtained and parsed correctly
-    var latitude = parseFloat(document.getElementById('latitude').value);
-    var longitude = parseFloat(document.getElementById('longitude').value);
-    if (!latitude || !longitude) {
-        alert("Invalid or missing latitude or longitude.");
+    var formData = new FormData();
+    formData.append('category', document.getElementById('landmark-category').value);
+    formData.append('description', document.getElementById('landmark-description').value);
+    formData.append('latitude', parseFloat(document.getElementById('latitude').value));
+    formData.append('longitude', parseFloat(document.getElementById('longitude').value));
+
+    var fileInput = document.getElementById('photo-upload');
+    if (fileInput.files.length > 0) {
+        formData.append('photo', fileInput.files[0]);
+    } else {
+        alert("Please select a photo to upload.");
         return;
     }
 
-    var location = { latitude, longitude };
-
-    var category = document.getElementById('landmark-category').value;
-    var description = document.getElementById('landmark-description').value;
-
-    console.log("Submitting Form:", { category, description, ...location });
-
     fetch('http://localhost:3000/submit', {
         method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-            category,
-            description,
-            location  // Using the new location object here
-        })
+        body: formData,
     })
     .then(response => response.json())
     .then(data => {
         alert('Form submitted successfully!');
-        document.getElementById('landmarkForm').style.display = 'none'; // Hide the form after successful submission
+        document.getElementById('landmarkForm').style.display = 'none';
     })
     .catch(error => {
         console.error('Error:', error);
-        alert('Failed to submit form.'); // Provide user feedback on failure
-    })
+        alert('Failed to submit form.');
+    });
+
 
     // Hide the form after submission
     document.getElementById('landmarkForm').style.display = 'none';
     
 });
 
-// const express = require('express');
-// const app = express();
-// const port = 3000;
 
 
-// // Client-side: JavaScript with OpenLayers
-// document.addEventListener('DOMContentLoaded', function() {
-//     fetch('/api/geotags')
-//         .then(response => response.json())
-//         .then(geotags => {
-//             geotags.forEach(geotag => {
-//                 addGeotagToMap(geotag);
-//             });
-//         })
-//         .catch(error => console.error('Error fetching geotags:', error));
-// });
 
-// function addGeotagToMap(geotag) {
-//     const feature = new ol.Feature({
-//         geometry: new ol.geom.Point(ol.proj.fromLonLat([geotag.longitude, geotag.latitude])),
-//         name: geotag.description // Assuming 'description' is one of the fields
-//     });
+// FETCHING DATA FUNCTIONALITY AND CONVERT IT TO FEATURES IN OPENLAYERS MAP
 
-//     const vectorSource = new ol.source.Vector({
-//         features: [feature]
-//     });
+// Fetch geotagged data from the server
+function fetchGeoTags() {
+    fetch('http://localhost:3000/api/geotags')
+    .then(response => response.json())
+    .then(data => {
+        const features = data.map(item => {
+            const feature = new ol.Feature({
+                geometry: new ol.geom.Point(ol.proj.fromLonLat([item.location.coordinates[0], item.location.coordinates[1]])),
+                category: item.category,
+                description: item.description,
+                images: item.images
+            });
+            return feature;
+        });
+        const vectorSource = new ol.source.Vector({
+            features: features
+        });
+        const vectorLayer = new ol.layer.Vector({
+            source: vectorSource,
+            style: new ol.style.Style({
+                image: new ol.style.Icon({
+                    src: 'resources/images/geotag.png',
+                    scale: 0.05
+                })
+            })
+        });
+        map.addLayer(vectorLayer);
+    })
+    .catch(error => console.error('Error fetching geotags:', error));
+}
 
-//     const vectorLayer = new ol.layer.Vector({
-//         source: vectorSource,
-//         style: new ol.style.Style({
-//             image: new ol.style.Icon({
-//                 src: 'resources/images/geotag.png',
-//                 scale: 0.05
-//             })
-//         })
-//     });
+fetchGeoTags();
 
-//     map.addLayer(vectorLayer);
-// }
 
 // Function to display the popup on hover
-map.on('pointermove', function(evt) {
-    if (evt.dragging) {
-        return; // Ignore drag events
-    }
-    const pixel = map.getEventPixel(evt.originalEvent);
-    const hit = map.hasFeatureAtPixel(pixel);
-    map.getTargetElement().style.cursor = hit ? 'pointer' : '';
-
-    if (hit) {
-        map.forEachFeatureAtPixel(pixel, function(feature, layer) {
-            const coord = feature.getGeometry().getCoordinates();
-            content.innerHTML = feature.get('name'); // Display feature's name
-            overlay.setPosition(coord);
-        });
-    } else {
-        overlay.setPosition(undefined);
-    }
+map.on('singleclick', function(evt) {
+    map.forEachFeatureAtPixel(evt.pixel, function(feature, layer) {
+        const coordinates = feature.getGeometry().getCoordinates();
+        overlay.setPosition(coordinates);
+        const props = feature.getProperties();
+        document.getElementById('popup-content').innerHTML = `
+            <h3>${props.category}</h3>
+            <p>${props.description}</p>
+            ${props.images ? `<img src="uploads/${props.images}" alt="Uploaded Image" style="max-width: 200px; height: auto;">` : '<p>No image available</p>'}
+        `;
+        return true;  // return true to stop iterating over further features
+    });
 });

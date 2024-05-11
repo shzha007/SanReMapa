@@ -14,6 +14,10 @@ app.use(cors());
 
 // Middleware to parse JSON bodies
 app.use(express.json());
+// Serve images as static files
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
+
 
 //for uploads
 const storage = multer.diskStorage({
@@ -71,18 +75,19 @@ app.listen(3000, () => console.log('Server running on http://localhost:3000'));
 
 
 // // Server-side: Node.js with Express
-// app.get('/api/geotags', async (req, res) => {
-//   try {
-//       const query = 'SELECT id, category, description, ST_AsGeoJSON(location) AS location, images FROM test_database';
-//       const { rows } = await pool.query(query);
-//       res.json(rows.map(row => ({
-//           ...row,
-//           location: JSON.parse(row.location) // Convert GeoJSON string back to object
-//       })));
-//   } catch (err) {
-//       console.error(err);
-//       res.status(500).json({ message: "Failed to fetch data." });
-//   }
-// });
+app.get('/api/geotags', async (req, res) => {
+  try {
+      const query = 'SELECT id, category, description, ST_AsGeoJSON(location) AS location, images FROM test_database';
+      const { rows } = await pool.query(query);
+      res.json(rows.map(row => ({
+          ...row,
+          location: JSON.parse(row.location) // Convert GeoJSON string back to object
+      })));
+  } catch (err) {
+      console.error(err);
+      res.status(500).json({ message: "Failed to fetch data." });
+  }
+});
+
 
 
