@@ -1225,75 +1225,90 @@ document.getElementById('submitForm').addEventListener('click', function(event) 
     }
 
     fetch('http://localhost:3000/submit', {
-        method: 'POST',
-        body: formData,
+    method: 'POST',
+    body: formData,
     })
     .then(response => response.json())
     .then(data => {
         alert('Form submitted successfully!');
         document.getElementById('landmarkForm').style.display = 'none';
+        fetchGeoTags(); // Refresh map data after successful submission
     })
     .catch(error => {
         console.error('Error:', error);
         alert('Failed to submit form.');
     });
 
-
-    // Hide the form after submission
+    // Optionally hide the form after submission
     document.getElementById('landmarkForm').style.display = 'none';
-    
 });
-
 
 
 
 // FETCHING DATA FUNCTIONALITY AND CONVERT IT TO FEATURES IN OPENLAYERS MAP
 
 // Fetch geotagged data from the server
+
+var geotagSources = new ol.source.Vector();
+    var geotagLayers = new ol.layer.Vector({
+        source: geotagSources,
+        style: new ol.style.Style({
+            image: new ol.style.Icon({
+                src: 'resources/images/geotag.png',
+                scale: 0.05
+            })
+        })
+    });
+    map.addLayer(geotagLayers);
+
+
 function fetchGeoTags() {
     fetch('http://localhost:3000/api/geotags')
     .then(response => response.json())
     .then(data => {
+        // Transform server data into OpenLayers features
         const features = data.map(item => {
-            const feature = new ol.Feature({
-                geometry: new ol.geom.Point(ol.proj.fromLonLat([item.location.coordinates[0], item.location.coordinates[1]])),
-                category: item.category,
-                description: item.description,
-                images: item.images
-            });
-            return feature;
-        });
-        const vectorSource = new ol.source.Vector({
-            features: features
-        });
-        const vectorLayer = new ol.layer.Vector({
-            source: vectorSource,
-            style: new ol.style.Style({
-                image: new ol.style.Icon({
-                    src: 'resources/images/geotag.png',
-                    scale: 0.05
-                })
-            })
-        });
-        map.addLayer(vectorLayer);
+            if (item.location && item.location.coordinates) {
+                return new ol.Feature({
+                    geometry: new ol.geom.Point(ol.proj.fromLonLat([
+                        item.location.coordinates[0],
+                        item.location.coordinates[1]
+                    ])),
+                    category: item.category,
+                    description: item.description,
+                    images: item.images
+                });
+            }
+            return null;
+        }).filter(f => f);  // Filter out undefined or null features
+
+        // Update the source with new features
+        geotagSources.clear();  // Clear existing features before adding new ones
+        geotagSources.addFeatures(features);  // Add new features to the source
     })
-    .catch(error => console.error('Error fetching geotags:', error));
+    .catch(error => {
+        console.error('Error fetching geotags:', error);
+    });
 }
 
+// Call fetchGeoTags to initially load geotagged data
 fetchGeoTags();
+
+
 
 
 // Function to display the popup on hover
 map.on('singleclick', function(evt) {
     map.forEachFeatureAtPixel(evt.pixel, function(feature, layer) {
-        const coordinates = feature.getGeometry().getCoordinates();
-        overlay.setPosition(coordinates);
-        const props = feature.getProperties();
-        document.getElementById('popup-content').innerHTML = `
-            <h3>${props.category}</h3>
-            <p>${props.description}</p>
-            ${props.images ? `<img src="uploads/${props.images}" alt="Uploaded Image" style="max-width: 200px; height: auto;">` : '<p>No image available</p>'}
-        `;
-        return true;  // return true to stop iterating over further features
+        if (layer === geotagLayers) {  // Ensure the feature belongs to geotagLayer
+            const coordinates = feature.getGeometry().getCoordinates();
+            overlay.setPosition(coordinates);
+            const props = feature.getProperties();
+            document.getElementById('popup-content').innerHTML = `
+                <h3>${props.category}</h3>
+                <p>${props.description}</p>
+                ${props.images ? `<img src="uploads/${props.images}" alt="Uploaded Image" style="max-width: 200px; height: auto;">` : '<p>No image available</p>'}
+            `;
+        }
     });
 });

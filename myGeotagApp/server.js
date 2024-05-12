@@ -77,7 +77,7 @@ app.listen(3000, () => console.log('Server running on http://localhost:3000'));
 // // Server-side: Node.js with Express
 app.get('/api/geotags', async (req, res) => {
   try {
-      const query = 'SELECT id, category, description, ST_AsGeoJSON(location) AS location, images FROM test_database';
+      const query = 'SELECT category, description, ST_AsGeoJSON(location) AS location, images FROM test_database';
       const { rows } = await pool.query(query);
       res.json(rows.map(row => ({
           ...row,
